@@ -10,30 +10,33 @@ post表单提交，上传文件，上传json
 
 下一步计划
 
-请求池优化，request的分离
+callpool优化
 
 ### get
 
 #### get请求
 
-        EHttp.get()
-                .url("http://192.168.2.154:3001/api/get")
-                .map2params(objectObjectHashMap)
-                .addHeader("aa", "123")
-                .addHeader("a1a", "123")
-                .addHeader("a13a", "123")
-                .async(new RequestCallback() {
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        String string = response.body().string();
-                    }
+       ERequest build = new ERequest.Builder()
+                      .get()
+                      .url("http://192.168.2.154:3001/api/get")
+                      .addHeader("aa", "123")
+                      .addHeader("a1a", "123")
+                      .addHeader("a13a", "123")
+                      .setReadTimeOut(10)
+                      .setWriteTimeOut(10)
+                      .setConnectTimeOut(10)
+                      .build();
+              new EHttp().newCall(build).async(new RequestCallback() {
+                  @Override
+                  public void onResponse(Response response) throws IOException {
+                      System.out.println(response.body().string());
+                  }
 
-                    @Override
-                    public void onFailure(IOException e) {
-
-                    }
-                });
-
+                  @Override
+                  public void onFailure(IOException e) {
+                      System.out.println(e);
+                  }
+              });
 
 
 ### post
@@ -41,61 +44,80 @@ post表单提交，上传文件，上传json
 #### 提交JSON
 
 
-        EHttp.post()
+        PostBody postBody = PostBody.create(MediaType.parse("application/json;charset=utf-8"), json);
+        ERequest build = new ERequest.Builder()
+                .post(postBody)
                 .url("http://192.168.2.154:3001/api/get")
-                .map2Json(objectObjectHashMap)
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .async(new RequestCallback() {
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        String string = response.body().string();
-                    }
+                .setReadTimeOut(10)
+                .setWriteTimeOut(10)
+                .setConnectTimeOut(10)
+                .build();
+        new EHttp().newCall(build).async(new RequestCallback() {
+            @Override
+            public void onResponse(Response response) throws IOException {
+                System.out.println(response.body().string());
+            }
 
-                    @Override
-                    public void onFailure(IOException e) {
+            @Override
+            public void onFailure(IOException e) {
+                System.out.println(e);
+            }
+        });
 
-                    }
-                });
 
 #### 表单提交
 
-        EHttp.post()
+        PostFormBody.Builder builder = new PostFormBody.Builder();
+        builder.addParams("123", "34526")
+                .addParams("adsfg", "Adfsg");
+        ERequest build = new ERequest.Builder()
+                .post(builder.build())
                 .url("http://192.168.2.154:3001/api/get")
-                .map2form(objectObjectHashMap)
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .async(new RequestCallback() {
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        String string = response.body().string();
-                    }
+                .setReadTimeOut(10)
+                .setWriteTimeOut(10)
+                .setConnectTimeOut(10)
+                .build();
+        new EHttp().newCall(build).async(new RequestCallback() {
+            @Override
+            public void onResponse(Response response) throws IOException {
+                System.out.println(response.body().string());
+            }
 
-                    @Override
-                    public void onFailure(IOException e) {
-
-                    }
-                });
-
+            @Override
+            public void onFailure(IOException e) {
+                System.out.println(e);
+            }
+        });
 
 #### 上传文件，并且有请求参数
 
-        EHttp.post()
+        PostFormBody.Builder builder = new PostFormBody.Builder();
+        builder.addParams("123", "34526")
+                .addParams("adsfg", "Adfsg").addKeyAndFile("file",new File(path));
+        ERequest build = new ERequest.Builder()
+                .post(builder.build())
                 .url("http://192.168.2.154:3001/api/get")
-                .map2formPostFile(objectObjectHashMap, keyfile,file)
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .async(new RequestCallback() {
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        String string = response.body().string();
-                    }
+                .setReadTimeOut(10)
+                .setWriteTimeOut(10)
+                .setConnectTimeOut(10)
+                .build();
+        new EHttp().newCall(build).async(new RequestCallback() {
+            @Override
+            public void onResponse(Response response) throws IOException {
+                System.out.println(response.body().string());
+            }
 
-                    @Override
-                    public void onFailure(IOException e) {
-
-                    }
-                });
+            @Override
+            public void onFailure(IOException e) {
+                System.out.println(e);
+            }
+        });
