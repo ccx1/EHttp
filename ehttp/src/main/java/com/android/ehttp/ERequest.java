@@ -54,9 +54,9 @@ public class ERequest {
 
         public Builder() {
             header = new HashMap<>();
-            readTimeOut = 3000;
-            writeTimeOut = 3000;
-            connectTimeOut = 3000;
+            readTimeOut = 10000;
+            writeTimeOut = 10000;
+            connectTimeOut = 10000;
             method = GET;
             params = new HashMap<>();
         }

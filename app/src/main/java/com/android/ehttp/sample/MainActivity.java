@@ -32,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .setReadTimeOut(10)
-                .setWriteTimeOut(10)
-                .setConnectTimeOut(10)
                 .build();
         new EHttp().newCall(build).async(new RequestCallback() {
             @Override

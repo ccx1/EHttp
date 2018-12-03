@@ -49,7 +49,7 @@ public class EHttpAsync extends AsyncTask<CallRequest, Void, Response> {
                 appendParams();
 
             }
-            currentCallRequest.getConnection().connect();
+//            currentCallRequest.getConnection().connect();
             InputStream inputStream = currentCallRequest.getConnection().getInputStream();
             currentCallRequest.setInputStream(inputStream);
         } catch (IOException e) {
