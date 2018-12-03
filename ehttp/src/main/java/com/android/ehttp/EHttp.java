@@ -14,6 +14,6 @@ public class EHttp {
 
     public Call newCall(ERequest eRequest) {
         // 管理池
-        return new Call(eRequest);
+        return RealCall.newRealCall(eRequest);
     }
 }

@@ -39,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
         new EHttp().newCall(build).async(new RequestCallback() {
             @Override
             public void onResponse(Response response) throws IOException {
-
+                System.out.println(response.body().string());
             }
 
             @Override
             public void onFailure(IOException e) {
-
+                System.out.println(e);
             }
         });
 

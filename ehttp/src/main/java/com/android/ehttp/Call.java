@@ -12,31 +12,9 @@ import java.io.IOException;
  * 修订历史：
  * ================================================
  */
-public class Call {
+public interface Call {
 
-    private ERequest eRequest;
+    void async(RequestCallback requestCallback);
 
-    public Call(ERequest eRequest) {
-        this.eRequest = eRequest;
-    }
-
-    public void async(RequestCallback requestCallback) {
-        // 异步池
-        EHttpAsync oneAsync = CallPool.getInstance().getOneAsync();
-        try {
-            oneAsync.execute(doRequestQueue(requestCallback));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private CallRequest doRequestQueue(RequestCallback requestCallback) throws IOException {
-        RequestQueue requestQueen = new RequestQueue(eRequest, requestCallback);
-        return requestQueen.getCallRequest();
-    }
-
-    public Response execute() throws IOException {
-        RequestQueue requestQueen = new RequestQueue(eRequest);
-        return requestQueen.execute();
-    }
+    Response execute() throws IOException;
 }
