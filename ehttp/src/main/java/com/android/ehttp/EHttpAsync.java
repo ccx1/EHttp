@@ -66,10 +66,10 @@ public class EHttpAsync extends AsyncTask<CallRequest, Void, Response> {
             currentCallRequest.setInputStream(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
-            DoPostRequest.TYPE = -1;
+            DoPostRequest.TYPE = DoPostRequest.DEFAULT;
             return new Response(e, callRequest);
         }
-        DoPostRequest.TYPE = -1;
+        DoPostRequest.TYPE = DoPostRequest.DEFAULT;
         return new Response(callRequest);
     }
 

@@ -18,10 +18,11 @@ import java.util.Map;
  * ================================================
  */
 public abstract class DoPostRequest extends DoRequest<PostRequest> implements PostRequest {
-    public static       int TYPE = -1;
-    public static final int JSON = 0;
-    public static final int FORM = 1;
-    public static final int FILE = 2;
+    public static       int TYPE    = DoPostRequest.DEFAULT;
+    public static final int DEFAULT = -1;
+    public static final int JSON    = 0;
+    public static final int FORM    = 1;
+    public static final int FILE    = 2;
 
     @Override
     public DoPostRequest map2Json(Map<String, String> params) {

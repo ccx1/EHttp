@@ -3,7 +3,6 @@ package com.android.ehttp;
 import com.android.ehttp.get.DoGetRequest;
 import com.android.ehttp.get.RequestGet;
 import com.android.ehttp.post.DoPostRequest;
-import com.android.ehttp.post.PostRequest;
 import com.android.ehttp.post.RequestPost;
 
 /**
@@ -25,4 +24,5 @@ public class EHttp {
     public static DoPostRequest post() {
         return new RequestPost();
     }
+
 }
