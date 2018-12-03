@@ -14,14 +14,20 @@ import java.io.IOException;
  */
 public interface Queue {
 
-    String UA                  = "ehttp";
+    String MY_UA                  = "ehttp";
     String CONTENT_TYPE        = "Content-Type";
+    String CONTENT_LENGTH      = "Content-Length";
     String CONTENT_DISPOSITION = "Content-Disposition";
 
     String TYPE_TEXT      = "text/html;charset=utf-8";
-    String TYPE_FORM_DATA = "multipart/form-data";
+    String TYPE_FORM_DATA = "multipart/form-data;charset=utf-8";
     String TYPE_JSON      = "application/json;charset=utf-8";
     String TYPE_STREAM    = "application/octet-stream;charset=utf-8";
+
+    String GET   = "GET";
+    String POST  = "POST";
+    String HTTPS = "https";
+    String UA    = "User-Agent";
 
     CallRequest build();
 

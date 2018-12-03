@@ -1,22 +1,15 @@
 package com.android.ehttp;
 
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
-
-import com.android.ehttp.post.DoPostRequest;
-import com.android.ehttp.post.PostModel;
-
-import org.json.JSONObject;
+import com.android.ehttp.body.PostBody;
+import com.android.ehttp.body.PostFormBody;
+import com.android.ehttp.body.PostModel;
 
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -31,9 +24,10 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import static com.android.ehttp.DoRequest.POST;
 import static com.android.ehttp.Queue.CONTENT_DISPOSITION;
 import static com.android.ehttp.Queue.CONTENT_TYPE;
+import static com.android.ehttp.Queue.HTTPS;
+import static com.android.ehttp.Queue.POST;
 
 /**
  * ================================================
@@ -46,8 +40,9 @@ import static com.android.ehttp.Queue.CONTENT_TYPE;
  * ================================================
  */
 public class CallRequest {
-    private final  Map<String, String> queryMap;
-    private final  PostModel           mP;
+    private        Map<String, String> queryMap;
+    private        PostModel           mP;
+    private        ERequest            eRequest;
     private        String              method;
     private        Map<String, String> header;
     private        RequestCallback     requestCallback;
@@ -58,31 +53,19 @@ public class CallRequest {
     private        HttpURLConnection   connection;
     private        InputStream         resultStream;
 
-    public CallRequest(String queryUrl, Map<String, String> header, String method) {
-        this(queryUrl, null, header, method, null, null);
-    }
-
-    public CallRequest(String queryUrl, Map<String, String> header, String method, RequestCallback requestCallback) {
-        this(queryUrl, null, header, method, null, requestCallback);
-    }
-
-    public CallRequest(String queryUrl, Map<String, String> queryMap, Map<String, String> header, String method, PostModel p) {
-        this(queryUrl, queryMap, header, method, p, null);
-    }
-
-    public CallRequest(String url, Map<String, String> queryMap, Map<String, String> header, String method, PostModel p, RequestCallback requestCallback) {
-        this.url = url;
-        this.mP = p;
-        this.queryMap = queryMap;
-        this.header = header;
-        this.method = method;
+    public CallRequest(ERequest eRequest, RequestCallback requestCallback) {
+        this.eRequest = eRequest;
         this.requestCallback = requestCallback;
+    }
+
+    public CallRequest(ERequest eRequest) {
+        this(eRequest, null);
     }
 
     public void build() throws IOException {
         // 生产链接
-        HttpURLConnection connection = getConnection(new URL(url), method);
-        for (Map.Entry<String, String> stringStringEntry : header.entrySet()) {
+        HttpURLConnection connection = getConnection(eRequest);
+        for (Map.Entry<String, String> stringStringEntry : eRequest.header.entrySet()) {
             connection.setRequestProperty(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
         this.connection = connection;
@@ -90,11 +73,11 @@ public class CallRequest {
     }
 
     public String getMethod() {
-        return method;
+        return eRequest.method;
     }
 
-    public Map<String, String> getQueryMap() {
-        return queryMap;
+    public ERequest getERequest() {
+        return eRequest;
     }
 
     public RequestCallback getRequestCallback() {
@@ -105,10 +88,11 @@ public class CallRequest {
         return connection;
     }
 
-    private HttpURLConnection getConnection(URL url, String method) throws
+    private HttpURLConnection getConnection(ERequest eRequest) throws
             IOException {
         HttpURLConnection conn = null;
-        if (DoRequest.HTTPS.equals(url.getProtocol())) {
+        URL               url  = new URL(eRequest.url);
+        if (HTTPS.equals(url.getProtocol())) {
             HttpsURLConnection connHttps = (HttpsURLConnection) url.openConnection();
             connHttps.setSSLSocketFactory(socketFactory);
             connHttps.setHostnameVerifier(verifier);
@@ -116,10 +100,12 @@ public class CallRequest {
         } else {
             conn = (HttpURLConnection) url.openConnection();
         }
-        conn.setRequestMethod(method);
+        conn.setRequestMethod(eRequest.method);
         conn.setAllowUserInteraction(true);
+        conn.setConnectTimeout(eRequest.connectTimeOut);
+        conn.setReadTimeout(eRequest.readTimeOut);
         conn.setInstanceFollowRedirects(true);
-        if (method.equalsIgnoreCase(DoRequest.POST)) {
+        if (eRequest.method.equalsIgnoreCase(POST)) {
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setUseCaches(false);
@@ -163,54 +149,51 @@ public class CallRequest {
 
     private void appendParams() throws IOException {
         if (this.getMethod().equalsIgnoreCase(POST)) {
-            OutputStream outputStream = null;
-            switch (DoPostRequest.TYPE) {
-                case DoPostRequest.JSON:
-                    postJson();
-                    break;
-                case DoPostRequest.FORM:
-                    postForm();
-                    break;
-                case DoPostRequest.FILE:
-                    postFile();
-                    break;
-                default:
-                    break;
+            PostBody body = this.getERequest().body;
+            if (body instanceof PostFormBody) {
+                PostFormBody b = (PostFormBody) body;
+                if (b.mFile == null) {
+                    postForm(b);
+                } else {
+                    postFile(b);
+                }
+            } else {
+                postJson();
             }
+
         }
     }
 
     private void postJson() throws IOException {
-        OutputStream        outputStream;
-        Map<String, String> queryMap = this.getQueryMap();
-        if (queryMap == null) {
+        OutputStream outputStream;
+        ERequest     eRequest = this.getERequest();
+        long         l        = eRequest.body.contentLength();
+        if (l == 0) {
             return;
         }
-        JSONObject jsonObject = new JSONObject(queryMap);
-        String     json       = jsonObject.toString();
         outputStream = this.getConnection().getOutputStream();
-        outputStream.write(json.getBytes());
+        outputStream.write(eRequest.body.create().getBuff());
         outputStream.flush();
         outputStream.close();
     }
 
-    private void postForm() throws IOException {
+    private void postForm(PostFormBody b) throws IOException {
         OutputStream outputStream;
-        String       queryUrl = CallHelper.getInstance().getQueryUrl("", this.getQueryMap());
+        String       queryUrl = CallHelper.getInstance().getQueryUrl("", b.params);
         outputStream = this.getConnection().getOutputStream();
         outputStream.write(queryUrl.getBytes());
         outputStream.flush();
         outputStream.close();
     }
 
-    private void postFile() throws IOException {
+    private void postFile(PostFormBody b) throws IOException {
         // 边界标识 随机生成
         String boundary = UUID.randomUUID().toString();
         String prefix   = "--";
         String lineEnd  = "\r\n";
 
         DataOutputStream    out      = new DataOutputStream(this.getConnection().getOutputStream());
-        Map<String, String> queryMap = this.getQueryMap();
+        Map<String, String> queryMap = b.params;
         if (queryMap != null && !queryMap.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String> entry : queryMap.entrySet()) {
@@ -224,27 +207,24 @@ public class CallRequest {
             }
             out.write(sb.toString().getBytes());
         }
-        if (!mP.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(prefix);
-            sb.append(boundary);
-            sb.append(lineEnd);
-            sb.append(CONTENT_DISPOSITION + ": form-data; name=\"").append(mP.getName()).append("\"; filename=\"").append(mP.getFile().getName()).append("\"").append(lineEnd);
-            sb.append(CONTENT_TYPE + Queue.TYPE_STREAM).append(lineEnd);
-            sb.append(lineEnd);
-            out.write(sb.toString().getBytes());
-            InputStream input = new FileInputStream(mP.getFile());
-            byte[]      bytes = new byte[1024];
-            int         len   = 0;
-            while ((len = input.read(bytes)) != -1) {
-                out.write(bytes, 0, len);
-            }
-            out.write(lineEnd.getBytes());
-            byte[] endData = (prefix + boundary + prefix + lineEnd).getBytes();
-            out.write(endData);
-            input.close();
-            out.flush();
+        StringBuilder sb = new StringBuilder();
+        sb.append(prefix);
+        sb.append(boundary);
+        sb.append(lineEnd);
+        sb.append(CONTENT_DISPOSITION + ": form-data; name=\"").append(b.keyFile).append("\"; filename=\"").append(b.mFile.getName()).append("\"").append(lineEnd);
+        sb.append(CONTENT_TYPE + Queue.TYPE_STREAM).append(lineEnd);
+        sb.append(lineEnd);
+        out.write(sb.toString().getBytes());
+        InputStream input = new FileInputStream(b.mFile);
+        byte[]      bytes = new byte[1024];
+        int         len   = 0;
+        while ((len = input.read(bytes)) != -1) {
+            out.write(bytes, 0, len);
         }
+        out.write(lineEnd.getBytes());
+        byte[] endData = (prefix + boundary + prefix + lineEnd).getBytes();
+        out.write(endData);
+        input.close();
         out.flush();
         out.close();
     }

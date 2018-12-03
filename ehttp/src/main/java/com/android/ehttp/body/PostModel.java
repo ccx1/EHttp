@@ -1,4 +1,4 @@
-package com.android.ehttp.post;
+package com.android.ehttp.body;
 
 import java.io.File;
 
@@ -16,6 +16,28 @@ public class PostModel {
 
     private String name;
     private File   file;
+
+    private byte[] buff;
+    private int offset;
+    private int length;
+
+    public PostModel(byte[] buff, int offset, int length) {
+        this.buff = buff;
+        this.offset = offset;
+        this.length = length;
+    }
+
+    public byte[] getBuff() {
+        return buff;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public int getLength() {
+        return length;
+    }
 
     public PostModel(String name, File file) {
         this.name = name;

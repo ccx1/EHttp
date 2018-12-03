@@ -22,7 +22,7 @@ public class CallHelper {
     }
 
     public static CallHelper getInstance() {
-        if (sCallHelper != null) {
+        if (sCallHelper == null) {
             sCallHelper = new CallHelper();
         }
         return sCallHelper;

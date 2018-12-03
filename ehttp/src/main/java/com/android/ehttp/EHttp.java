@@ -1,10 +1,5 @@
 package com.android.ehttp;
 
-import com.android.ehttp.get.DoGetRequest;
-import com.android.ehttp.get.RequestGet;
-import com.android.ehttp.post.DoPostRequest;
-import com.android.ehttp.post.RequestPost;
-
 /**
  * ================================================
  *
@@ -17,12 +12,8 @@ import com.android.ehttp.post.RequestPost;
  */
 public class EHttp {
 
-    public static DoGetRequest get() {
-        return new RequestGet();
+    public Call newCall(ERequest eRequest) {
+        // 管理池
+        return new Call(eRequest);
     }
-
-    public static DoPostRequest post() {
-        return new RequestPost();
-    }
-
 }

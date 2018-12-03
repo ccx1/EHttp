@@ -1,12 +1,6 @@
 package com.android.ehttp;
 
-import com.android.ehttp.get.GetQueue;
-import com.android.ehttp.post.PostModel;
-import com.android.ehttp.post.PostQueue;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * ================================================
@@ -20,46 +14,19 @@ import java.util.Map;
  */
 public class RequestQueue {
 
-    private PostModel           mPostModel;
-    private String              url;
-    private Map<String, String> queryMap;
-    private Map<String, String> header;
-    private RequestCallback     requestCallback;
-    private Queue               mQueen;
-
-    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header) throws IOException {
-        this(url, method, queryMap, header, null);
-    }
-
-    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header, PostModel postModel) throws IOException {
-        this(url, method, queryMap, header, postModel, null);
-    }
-
-    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header, PostModel postModel, RequestCallback requestCallback) throws IOException {
-        this.url = url;
-        this.queryMap = queryMap;
-        this.header = header;
-        this.requestCallback = requestCallback;
-        if (method.equalsIgnoreCase(DoRequest.GET)) {
-            doGet();
-        } else {
-            this.mPostModel = postModel;
-            doPost();
-        }
-    }
+    private Queue mQueen;
 
 
-    private void doPost() throws IOException {
-        mQueen = new PostQueue(url, queryMap, header, mPostModel, requestCallback);
+    public RequestQueue(ERequest eRequest, RequestCallback requestCallback) throws IOException {
+        mQueen = new NetworkQueue(eRequest, requestCallback);
         mQueen.async();
     }
 
-    private void doGet() throws IOException {
-        // 拼接数据处理
-        mQueen = new GetQueue(url, queryMap, header, requestCallback);
-        // 异步处理数据
+    public RequestQueue(ERequest eRequest) throws IOException {
+        mQueen = new NetworkQueue(eRequest);
         mQueen.async();
     }
+
 
     public CallRequest getCallRequest() {
         return mQueen.build();

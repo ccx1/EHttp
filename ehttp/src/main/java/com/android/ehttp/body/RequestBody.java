@@ -1,19 +1,19 @@
-package com.android.ehttp.get;
+package com.android.ehttp.body;
 
-
-import java.util.HashMap;
+import java.nio.charset.Charset;
 
 /**
  * ================================================
  *
  * @author ：ccx
  * 版    本：1.0
- * 创建日期：2018/11/30
+ * 创建日期：2018/12/3
  * 描    述：
  * 修订历史：
  * ================================================
  */
-public interface GetRequest {
+public interface RequestBody {
 
-    GetRequest map2params(HashMap<String, String> objectObjectHashMap);
+    Charset UTF_8 = Charset.forName("UTF-8");
+
 }
