@@ -6,6 +6,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.WebSettings;
 
+import com.android.ehttp.CallHelper;
 import com.android.ehttp.CallRequest;
 import com.android.ehttp.DoRequest;
 import com.android.ehttp.Queue;
@@ -49,43 +50,22 @@ public class GetQueue implements Queue {
 
     @Override
     public void async() throws IOException {
+        String property = System.getProperty("http.agent");
         if (header == null) {
             header = new HashMap<>(16);
-            String property = System.getProperty("http.agent");
-            header.put(DoRequest.UA, TextUtils.isEmpty(property) ? "ehttp" : property);
-            header.put("Content-Type", "text/html;charset=utf-8");
+            header.put(DoRequest.UA, property == null ? UA : property);
+            header.put(CONTENT_TYPE, TYPE_TEXT);
         }
         if (TextUtils.isEmpty(header.get(DoRequest.UA))) {
-            String property = System.getProperty("http.agent");
-            header.put(DoRequest.UA, TextUtils.isEmpty(property) ? "ehttp" : property);
+            header.put(DoRequest.UA, property == null ? UA : property);
         }
-        mCallRequest = new CallRequest(getQueryUrl(url, queryMap), header, GET, requestCallback);
+        mCallRequest = new CallRequest(CallHelper.getInstance().getQueryUrl(url, queryMap), header, GET, requestCallback);
         mCallRequest.build();
     }
 
-    /**
-     * 拼接get数据
-     *
-     * @param url    地址
-     * @param params get参数
-     * @return 新的url
-     */
-    private static String getQueryUrl(String url, Map<String, String> params) {
-        StringBuilder neoUrl = new StringBuilder(url);
-        if (params != null && !params.isEmpty()) {
-            neoUrl.append("?");
-            for (Map.Entry<String, String> stringStringEntry : params.entrySet()) {
-                neoUrl.append(stringStringEntry.getKey()).append("=").append(stringStringEntry.getValue()).append("&");
-            }
-            neoUrl = new StringBuilder(neoUrl.substring(0, neoUrl.length() - 1));
-        }
-        return neoUrl.toString();
-    }
-
-
     @Override
     public Response execute() throws IOException {
-        mCallRequest = new CallRequest(getQueryUrl(url, queryMap), header, GET);
+        mCallRequest = new CallRequest(CallHelper.getInstance().getQueryUrl(url, queryMap), header, GET);
         mCallRequest.build();
         return mCallRequest.execute();
     }

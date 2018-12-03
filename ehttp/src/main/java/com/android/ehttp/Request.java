@@ -13,7 +13,7 @@ import java.util.HashMap;
  * 修订历史：
  * ================================================
  */
-public interface Request<T> {
+interface Request<T> {
     T url(String url);
 
     T addHeader(String key, String value);

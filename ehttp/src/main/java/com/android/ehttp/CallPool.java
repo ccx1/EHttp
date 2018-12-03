@@ -1,5 +1,8 @@
 package com.android.ehttp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * ================================================
  *
@@ -12,7 +15,8 @@ package com.android.ehttp;
  */
 public class CallPool {
 
-    private static CallPool sCallPool;
+    private static CallPool         sCallPool;
+    private        List<EHttpAsync> task = new ArrayList<>();
 
     public static CallPool getInstance() {
         if (sCallPool == null) {
@@ -26,7 +30,6 @@ public class CallPool {
     }
 
     public EHttpAsync getOneAsync() {
-        // 统一管理池
         return new EHttpAsync();
     }
 }

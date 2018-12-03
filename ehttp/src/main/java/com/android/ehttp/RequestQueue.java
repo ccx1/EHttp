@@ -1,8 +1,10 @@
 package com.android.ehttp;
 
 import com.android.ehttp.get.GetQueue;
+import com.android.ehttp.post.PostModel;
 import com.android.ehttp.post.PostQueue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import java.util.Map;
  */
 public class RequestQueue {
 
+    private PostModel           mPostModel;
     private String              url;
     private Map<String, String> queryMap;
     private Map<String, String> header;
@@ -28,7 +31,11 @@ public class RequestQueue {
         this(url, method, queryMap, header, null);
     }
 
-    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header, RequestCallback requestCallback) throws IOException {
+    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header, PostModel postModel) throws IOException {
+        this(url, method, queryMap, header, postModel, null);
+    }
+
+    public RequestQueue(String url, String method, Map<String, String> queryMap, Map<String, String> header, PostModel postModel, RequestCallback requestCallback) throws IOException {
         this.url = url;
         this.queryMap = queryMap;
         this.header = header;
@@ -36,13 +43,14 @@ public class RequestQueue {
         if (method.equalsIgnoreCase(DoRequest.GET)) {
             doGet();
         } else {
+            this.mPostModel = postModel;
             doPost();
         }
     }
 
 
     private void doPost() throws IOException {
-        mQueen = new PostQueue(url, queryMap, header, requestCallback);
+        mQueen = new PostQueue(url, queryMap, header, mPostModel, requestCallback);
         mQueen.async();
     }
 

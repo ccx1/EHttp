@@ -2,15 +2,12 @@ package com.android.ehttp.post;
 
 import com.android.ehttp.CallPool;
 import com.android.ehttp.CallRequest;
-import com.android.ehttp.DoRequest;
 import com.android.ehttp.EHttpAsync;
-import com.android.ehttp.Request;
 import com.android.ehttp.RequestCallback;
 import com.android.ehttp.RequestQueue;
 import com.android.ehttp.Response;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * ================================================
@@ -37,13 +34,13 @@ public class RequestPost extends DoPostRequest {
     }
 
     private CallRequest doPost(RequestCallback requestCallback) throws IOException {
-        RequestQueue requestQueen = new RequestQueue(url, POST, queryMap, header, requestCallback);
+        RequestQueue requestQueen = new RequestQueue(url, POST, queryMap, header, new PostModel(this.key, this.file), requestCallback);
         return requestQueen.getCallRequest();
     }
 
     @Override
     public Response execute() throws IOException {
-        RequestQueue requestQueen = new RequestQueue(url, POST, queryMap, header);
+        RequestQueue requestQueen = new RequestQueue(url, POST, queryMap, header, new PostModel(this.key, this.file));
         return requestQueen.execute();
     }
 }

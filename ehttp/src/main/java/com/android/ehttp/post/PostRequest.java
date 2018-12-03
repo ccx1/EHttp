@@ -1,5 +1,6 @@
 package com.android.ehttp.post;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -14,9 +15,13 @@ import java.util.Map;
  */
 public interface PostRequest {
 
-    PostRequest map2Json( Map<String, String> params);
+    PostRequest map2Json(Map<String, String> params);
 
-    PostRequest map2form( Map<String, String> params);
+    PostRequest map2form(Map<String, String> params);
+
+    PostRequest map2formPostFile(Map<String, String> params, String key, File file);
+
+    PostRequest map2formPostFile(Map<String, String> params, File file);
 
 
 }

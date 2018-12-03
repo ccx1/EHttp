@@ -9,10 +9,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.util.Map;
 
-import static com.android.ehttp.DoRequest.GET;
 import static com.android.ehttp.DoRequest.POST;
 
 /**

@@ -9,6 +9,7 @@ import com.android.ehttp.Queue;
 import com.android.ehttp.RequestCallback;
 import com.android.ehttp.Response;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,17 +27,19 @@ import static com.android.ehttp.DoRequest.POST;
  * ================================================
  */
 public class PostQueue implements Queue {
+    private PostModel           mPostModel;
     private String              url;
     private Map<String, String> queryMap;
     private Map<String, String> header;
     private RequestCallback     requestCallback;
     private CallRequest         mCallRequest;
 
-    public PostQueue(String url, Map<String, String> queryMap, Map<String, String> header, RequestCallback requestCallback) {
+    public PostQueue(String url, Map<String, String> queryMap, Map<String, String> header, PostModel postModel, RequestCallback requestCallback) {
         this.url = url;
         this.queryMap = queryMap;
         this.header = header;
         this.requestCallback = requestCallback;
+        this.mPostModel = postModel;
     }
 
     @Override
@@ -46,34 +49,34 @@ public class PostQueue implements Queue {
 
     @Override
     public void async() throws IOException {
+        String property = System.getProperty("http.agent");
         if (header == null) {
             header = new HashMap<>(16);
-            String property = System.getProperty("http.agent");
-            header.put(DoRequest.UA, TextUtils.isEmpty(property) ? "ehttp" : property);
+            header.put(DoRequest.UA, property == null ? UA : property);
             switch (DoPostRequest.TYPE) {
-                case 0:
-                    header.put("Content-Type", "application/json;charset=utf-8");
+                case DoPostRequest.JSON:
+                    header.put(CONTENT_TYPE, TYPE_JSON);
                     break;
-                case 1:
-                    header.put("Content-Type", "multipart/form-data");
+                case DoPostRequest.FORM:
+                case DoPostRequest.FILE:
+                    header.put(CONTENT_TYPE, TYPE_FORM_DATA);
                     break;
                 default:
-                    header.put("Content-Type", "text/html;charset=utf-8");
+                    header.put(CONTENT_TYPE, TYPE_TEXT);
                     break;
             }
 
         }
         if (TextUtils.isEmpty(header.get(DoRequest.UA))) {
-            String property = System.getProperty("http.agent");
-            header.put(DoRequest.UA, TextUtils.isEmpty(property) ? "ehttp" : property);
+            header.put(DoRequest.UA, property == null ? UA : property);
         }
-        mCallRequest = new CallRequest(url, queryMap, header, POST, requestCallback);
+        mCallRequest = new CallRequest(url, queryMap, header, POST, mPostModel, requestCallback);
         mCallRequest.build();
     }
 
     @Override
     public Response execute() throws IOException {
-        mCallRequest = new CallRequest(url, queryMap, header, POST, requestCallback);
+        mCallRequest = new CallRequest(url, queryMap, header, POST, mPostModel);
         mCallRequest.build();
         return mCallRequest.execute();
     }

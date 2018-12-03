@@ -4,15 +4,12 @@ import android.support.annotation.NonNull;
 
 import com.android.ehttp.CallPool;
 import com.android.ehttp.CallRequest;
-import com.android.ehttp.DoRequest;
 import com.android.ehttp.EHttpAsync;
-import com.android.ehttp.Request;
 import com.android.ehttp.RequestCallback;
 import com.android.ehttp.RequestQueue;
 import com.android.ehttp.Response;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * ================================================
@@ -40,7 +37,7 @@ public class RequestGet extends DoGetRequest {
     }
 
     private CallRequest doGet(RequestCallback requestCallback) throws IOException {
-        RequestQueue requestQueen = new RequestQueue(url, GET, queryMap, header, requestCallback);
+        RequestQueue requestQueen = new RequestQueue(url, GET, queryMap, header, null, requestCallback);
         return requestQueen.getCallRequest();
     }
 

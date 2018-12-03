@@ -2,6 +2,7 @@ package com.android.ehttp;
 
 import com.android.ehttp.get.GetRequest;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,10 +24,11 @@ public abstract class DoRequest<T> implements Request<T> {
     public static final String              POST           = "POST";
     public static final String              HTTPS          = "https";
     public static final String              UA             = "User-Agent";
-    public              int                 ReadTimeOut    = 10;
-    public              int                 WriteTimeOut   = 10;
-    public              int                 ConnectTimeOut = 10;
-
+    protected           int                 ReadTimeOut    = 10;
+    protected           int                 WriteTimeOut   = 10;
+    protected           int                 ConnectTimeOut = 10;
+    protected           File                file;
+    protected           String              key;
 
     @Override
     public void setReadTimeOut(int readTimeOut) {

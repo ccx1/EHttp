@@ -1,7 +1,10 @@
 package com.android.ehttp.post;
 
+import android.support.annotation.NonNull;
+
 import com.android.ehttp.DoRequest;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -15,19 +18,36 @@ import java.util.Map;
  * ================================================
  */
 public abstract class DoPostRequest extends DoRequest<PostRequest> implements PostRequest {
-    public static int TYPE = -1;
+    public static       int TYPE = -1;
+    public static final int JSON = 0;
+    public static final int FORM = 1;
+    public static final int FILE = 2;
 
     @Override
     public DoPostRequest map2Json(Map<String, String> params) {
-        TYPE = 0;
+        TYPE = JSON;
         this.queryMap = params;
         return this;
     }
 
     @Override
     public DoPostRequest map2form(Map<String, String> params) {
-        TYPE = 1;
+        TYPE = FORM;
         this.queryMap = params;
+        return this;
+    }
+
+    @Override
+    public DoPostRequest map2formPostFile(Map<String, String> params, @NonNull File file) {
+        return map2formPostFile(params, file.getName(), file);
+    }
+
+    @Override
+    public DoPostRequest map2formPostFile(Map<String, String> params, String key, File file) {
+        TYPE = FILE;
+        this.queryMap = params;
+        this.file = file;
+        this.key = key;
         return this;
     }
 
