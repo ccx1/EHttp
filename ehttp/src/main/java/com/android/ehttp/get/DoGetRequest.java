@@ -1,11 +1,6 @@
 package com.android.ehttp.get;
 
 import com.android.ehttp.DoRequest;
-import com.android.ehttp.Request;
-import com.android.ehttp.RequestCallback;
-import com.android.ehttp.Response;
-
-import java.io.IOException;
 import java.util.HashMap;
 
 /**

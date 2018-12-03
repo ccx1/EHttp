@@ -1,7 +1,6 @@
 package com.android.ehttp;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * ================================================

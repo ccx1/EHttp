@@ -1,6 +1,5 @@
 package com.android.ehttp.get;
 
-import com.android.ehttp.Request;
 
 import java.util.HashMap;
 
