@@ -3,6 +3,7 @@ package com.android.ehttp;
 import android.text.TextUtils;
 
 import com.android.ehttp.body.MediaType;
+import com.android.ehttp.call.CallRequest;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public class NetworkQueue implements Queue {
 
     @Override
     public void async() throws IOException {
-        String property = System.getProperty("http.agent");
+        String property = System.getProperty(UA_KEY);
         if (TextUtils.isEmpty(eRequest.header.get(UA))) {
             eRequest.header.put(UA, property == null ? MY_UA : property);
         }

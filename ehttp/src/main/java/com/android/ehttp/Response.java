@@ -1,8 +1,9 @@
 package com.android.ehttp;
 
+import com.android.ehttp.call.CallRequest;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 
 /**
  * ================================================
@@ -44,6 +45,9 @@ public class Response {
     }
 
     public IOException getException() {
+        if (mCurrentRequest.getResultByte() != null && mCurrentRequest.getResultByte().length != 0) {
+            return new IOException(new String(mCurrentRequest.getResultByte()));
+        }
         return e;
     }
 

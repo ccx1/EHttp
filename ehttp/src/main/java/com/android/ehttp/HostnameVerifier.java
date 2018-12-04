@@ -20,29 +20,29 @@ public class HostnameVerifier implements javax.net.ssl.HostnameVerifier {
     private static final int              ALT_IPA_NAME         = 7;
     private static final Pattern          VERIFY_AS_IP_ADDRESS = Pattern.compile("([0-9a-fA-F]*:[0-9a-fA-F:.]*)|([\\d.]+)");
 
-    HostnameVerifier() {
+    public HostnameVerifier() {
     }
 
     @Override
     public boolean verify(String host, SSLSession session) {
         try {
             Certificate[] certificates = session.getPeerCertificates();
-            return this.verify(host, (X509Certificate)certificates[0]);
+            return this.verify(host, (X509Certificate) certificates[0]);
         } catch (SSLException var4) {
             return false;
         }
     }
 
     public boolean verify(String host, X509Certificate certificate) {
-        return verifyAsIpAddress(host)?this.verifyIpAddress(host, certificate):this.verifyHostname(host, certificate);
+        return verifyAsIpAddress(host) ? this.verifyIpAddress(host, certificate) : this.verifyHostname(host, certificate);
     }
 
     private boolean verifyIpAddress(String ipAddress, X509Certificate certificate) {
         List<String> altNames = getSubjectAltNames(certificate, 7);
         int          i        = 0;
 
-        for(int size = altNames.size(); i < size; ++i) {
-            if(ipAddress.equalsIgnoreCase((String)altNames.get(i))) {
+        for (int size = altNames.size(); i < size; ++i) {
+            if (ipAddress.equalsIgnoreCase((String) altNames.get(i))) {
                 return true;
             }
         }
@@ -57,12 +57,12 @@ public class HostnameVerifier implements javax.net.ssl.HostnameVerifier {
 
         String altName;
         do {
-            if(!var4.hasNext()) {
+            if (!var4.hasNext()) {
                 return false;
             }
 
-            altName = (String)var4.next();
-        } while(!this.verifyHostname(hostname, altName));
+            altName = (String) var4.next();
+        } while (!this.verifyHostname(hostname, altName));
 
         return true;
     }
@@ -70,7 +70,7 @@ public class HostnameVerifier implements javax.net.ssl.HostnameVerifier {
     public static List<String> allSubjectAltNames(X509Certificate certificate) {
         List<String> altIpaNames = getSubjectAltNames(certificate, 7);
         List<String> altDnsNames = getSubjectAltNames(certificate, 2);
-        List<String> result = new ArrayList(altIpaNames.size() + altDnsNames.size());
+        List<String> result      = new ArrayList(altIpaNames.size() + altDnsNames.size());
         result.addAll(altIpaNames);
         result.addAll(altDnsNames);
         return result;
@@ -81,19 +81,19 @@ public class HostnameVerifier implements javax.net.ssl.HostnameVerifier {
 
         try {
             Collection<?> subjectAltNames = certificate.getSubjectAlternativeNames();
-            if(subjectAltNames == null) {
+            if (subjectAltNames == null) {
                 return Collections.emptyList();
             } else {
                 Iterator var4 = subjectAltNames.iterator();
 
-                while(var4.hasNext()) {
-                    Object subjectAltName = var4.next();
-                    List<?> entry = (List)subjectAltName;
-                    if(entry != null && entry.size() >= 2) {
-                        Integer altNameType = (Integer)entry.get(0);
-                        if(altNameType != null && altNameType.intValue() == type) {
-                            String altName = (String)entry.get(1);
-                            if(altName != null) {
+                while (var4.hasNext()) {
+                    Object  subjectAltName = var4.next();
+                    List<?> entry          = (List) subjectAltName;
+                    if (entry != null && entry.size() >= 2) {
+                        Integer altNameType = (Integer) entry.get(0);
+                        if (altNameType != null && altNameType.intValue() == type) {
+                            String altName = (String) entry.get(1);
+                            if (altName != null) {
                                 result.add(altName);
                             }
                         }
@@ -108,27 +108,27 @@ public class HostnameVerifier implements javax.net.ssl.HostnameVerifier {
     }
 
     public boolean verifyHostname(String hostname, String pattern) {
-        if(hostname != null && hostname.length() != 0 && !hostname.startsWith(".") && !hostname.endsWith("..")) {
-            if(pattern != null && pattern.length() != 0 && !pattern.startsWith(".") && !pattern.endsWith("..")) {
-                if(!hostname.endsWith(".")) {
+        if (hostname != null && hostname.length() != 0 && !hostname.startsWith(".") && !hostname.endsWith("..")) {
+            if (pattern != null && pattern.length() != 0 && !pattern.startsWith(".") && !pattern.endsWith("..")) {
+                if (!hostname.endsWith(".")) {
                     hostname = hostname + '.';
                 }
 
-                if(!pattern.endsWith(".")) {
+                if (!pattern.endsWith(".")) {
                     pattern = pattern + '.';
                 }
 
                 pattern = pattern.toLowerCase(Locale.US);
-                if(!pattern.contains("*")) {
+                if (!pattern.contains("*")) {
                     return hostname.equals(pattern);
-                } else if(pattern.startsWith("*.") && pattern.indexOf(42, 1) == -1) {
-                    if(hostname.length() < pattern.length()) {
+                } else if (pattern.startsWith("*.") && pattern.indexOf(42, 1) == -1) {
+                    if (hostname.length() < pattern.length()) {
                         return false;
-                    } else if("*.".equals(pattern)) {
+                    } else if ("*.".equals(pattern)) {
                         return false;
                     } else {
                         String suffix = pattern.substring(1);
-                        if(!hostname.endsWith(suffix)) {
+                        if (!hostname.endsWith(suffix)) {
                             return false;
                         } else {
                             int suffixStartIndexInHostname = hostname.length() - suffix.length();

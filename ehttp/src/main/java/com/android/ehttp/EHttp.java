@@ -1,5 +1,8 @@
 package com.android.ehttp;
 
+import com.android.ehttp.call.Call;
+import com.android.ehttp.call.RealCall;
+
 /**
  * ================================================
  *

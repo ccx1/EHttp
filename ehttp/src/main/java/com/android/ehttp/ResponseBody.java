@@ -1,12 +1,9 @@
 package com.android.ehttp;
 
-import android.accounts.NetworkErrorException;
-import android.support.annotation.NonNull;
+import com.android.ehttp.call.CallRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.UnknownServiceException;
 
 /**
  * ================================================
@@ -24,27 +21,12 @@ public class ResponseBody {
 
     public ResponseBody(CallRequest request) {
         this.request = request;
+
     }
 
     public String string() throws IOException {
-        InputStream inputStream = request.getResultStream();
-        if (inputStream == null) {
-            throw new UnknownServiceException("service connect fail");
-        }
-        ByteArrayOutputStream bos = getResult(inputStream);
-        return new String(bos.toByteArray());
+        return new String(request.getResultByte());
     }
 
-    @NonNull
-    private ByteArrayOutputStream getResult(InputStream inputStream) throws IOException {
-        byte[]                buffer = new byte[1024];
-        int                   len;
-        ByteArrayOutputStream bos    = new ByteArrayOutputStream();
-        while ((len = inputStream.read(buffer)) != -1) {
-            bos.write(buffer, 0, len);
-        }
-        bos.close();
-        inputStream.close();
-        return bos;
-    }
+
 }

@@ -1,21 +1,23 @@
-package com.android.ehttp;
+package com.android.ehttp.call;
 
-import com.android.ehttp.body.PostBody;
-import com.android.ehttp.body.PostFormBody;
+import android.support.annotation.NonNull;
+
+import com.android.ehttp.ERequest;
+import com.android.ehttp.HostnameVerifier;
+import com.android.ehttp.RequestCallback;
+import com.android.ehttp.Response;
 import com.android.ehttp.body.PostModel;
 
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownServiceException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -24,8 +26,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import static com.android.ehttp.Queue.CONTENT_DISPOSITION;
-import static com.android.ehttp.Queue.CONTENT_TYPE;
 import static com.android.ehttp.Queue.HTTPS;
 import static com.android.ehttp.Queue.POST;
 
@@ -52,6 +52,7 @@ public class CallRequest {
     private static SSLSocketFactory    socketFactory = null;
     private        HttpURLConnection   connection;
     private        InputStream         resultStream;
+    private        byte[]              resultByte;
 
     public CallRequest(ERequest eRequest, RequestCallback requestCallback) {
         this.eRequest = eRequest;
@@ -126,109 +127,58 @@ public class CallRequest {
         verifier = new HostnameVerifier();
     }
 
-    public void setInputStream(InputStream inputStream) {
+    public void setInputStream(InputStream inputStream) throws IOException {
         this.resultStream = inputStream;
+//        InputStream inputStream = resultStream;
+        if (inputStream == null) {
+            throw new UnknownServiceException("service connect fail");
+        }
+        ByteArrayOutputStream bos = getResult(resultStream);
+        this.resultByte = bos.toByteArray();
+    }
+
+    @NonNull
+    private ByteArrayOutputStream getResult(InputStream inputStream) throws IOException {
+
+        byte[]                buffer = new byte[1024];
+        int                   len;
+        ByteArrayOutputStream bos    = new ByteArrayOutputStream();
+        while ((len = inputStream.read(buffer)) != -1) {
+            bos.write(buffer, 0, len);
+        }
+        bos.close();
+        inputStream.close();
+        return bos;
     }
 
     public InputStream getResultStream() {
         return resultStream;
     }
 
+    public byte[] getResultByte() {
+        return resultByte;
+    }
+
     public Response execute() {
         try {
-            appendParams();
+            new CallRequestPost.CallRequestPostHolder(this).build();
             this.getConnection().connect();
             InputStream inputStream = this.getConnection().getInputStream();
             this.setInputStream(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
-            return new Response(e, this);
+            InputStream errorStream = this.getConnection().getErrorStream();
+            try {
+                this.setInputStream(errorStream);
+                return new Response(e, this);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return new Response(e1, this);
+            }
+
         }
         return new Response(this);
     }
-
-    private void appendParams() throws IOException {
-        if (this.getMethod().equalsIgnoreCase(POST)) {
-            PostBody body = this.getERequest().body;
-            if (body instanceof PostFormBody) {
-                PostFormBody b = (PostFormBody) body;
-                if (b.mFile == null) {
-                    postForm(b);
-                } else {
-                    postFile(b);
-                }
-            } else {
-                postJson();
-            }
-
-        }
-    }
-
-    private void postJson() throws IOException {
-        OutputStream outputStream;
-        ERequest     eRequest = this.getERequest();
-        long         l        = eRequest.body.contentLength();
-        if (l == 0) {
-            return;
-        }
-        outputStream = this.getConnection().getOutputStream();
-        outputStream.write(eRequest.body.create().getBuff());
-        outputStream.flush();
-        outputStream.close();
-    }
-
-    private void postForm(PostFormBody b) throws IOException {
-        OutputStream outputStream;
-        String       queryUrl = CallHelper.getInstance().getQueryUrl("", b.params);
-        outputStream = this.getConnection().getOutputStream();
-        outputStream.write(queryUrl.getBytes());
-        outputStream.flush();
-        outputStream.close();
-    }
-
-    private void postFile(PostFormBody b) throws IOException {
-        // 边界标识 随机生成
-        String boundary = UUID.randomUUID().toString();
-        String prefix   = "--";
-        String lineEnd  = "\r\n";
-
-        DataOutputStream    out      = new DataOutputStream(this.getConnection().getOutputStream());
-        Map<String, String> queryMap = b.params;
-        if (queryMap != null && !queryMap.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, String> entry : queryMap.entrySet()) {
-                String key   = entry.getKey();
-                String value = entry.getValue();
-                sb.append(prefix).append(boundary).append(lineEnd);
-                sb.append(CONTENT_DISPOSITION + ": form-data; name=\"")
-                        .append(key).append("\"").append(lineEnd)
-                        .append(lineEnd);
-                sb.append(value).append(lineEnd);
-            }
-            out.write(sb.toString().getBytes());
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(prefix);
-        sb.append(boundary);
-        sb.append(lineEnd);
-        sb.append(CONTENT_DISPOSITION + ": form-data; name=\"").append(b.keyFile).append("\"; filename=\"").append(b.mFile.getName()).append("\"").append(lineEnd);
-        sb.append(CONTENT_TYPE + Queue.TYPE_STREAM).append(lineEnd);
-        sb.append(lineEnd);
-        out.write(sb.toString().getBytes());
-        InputStream input = new FileInputStream(b.mFile);
-        byte[]      bytes = new byte[1024];
-        int         len   = 0;
-        while ((len = input.read(bytes)) != -1) {
-            out.write(bytes, 0, len);
-        }
-        out.write(lineEnd.getBytes());
-        byte[] endData = (prefix + boundary + prefix + lineEnd).getBytes();
-        out.write(endData);
-        input.close();
-        out.flush();
-        out.close();
-    }
-
 
     private static class DefaultTrustManager implements X509TrustManager {
         private DefaultTrustManager(Object o) {

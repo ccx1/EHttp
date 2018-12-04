@@ -1,6 +1,7 @@
 package com.android.ehttp.sample;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -10,6 +11,7 @@ import com.android.ehttp.RequestCallback;
 import com.android.ehttp.Response;
 import com.android.ehttp.body.PostFormBody;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,20 +25,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void btn1(View view) {
+        File                 file    = new File(Environment.getExternalStorageDirectory() + "/" + "aaa.mp4");
         PostFormBody.Builder builder = new PostFormBody.Builder();
-        builder.addParams("123", "34526")
-                .addParams("adsfg", "Adfsg");
+        builder.addParams("op", "upload")
+                .addParams("insertOnly","0")
+                .addKeyAndFile("filecontent", file);
         ERequest build = new ERequest.Builder()
                 .post(builder.build())
-                .url("http://192.168.2.154:3001/api/get")
-                .addHeader("aa", "123")
-                .addHeader("a1a", "123")
-                .addHeader("a13a", "123")
+                .addHeader("cache-control","no-cache")
+                .addHeader("Authorization","AKIDHNH4iCMszvmaDlFKBtDSXQhGft28knNr")
+                .url("http://a-1254151704.cos.ap-chengdu.myqcloud.com/files/v2/1254151704/a/c/" + file.getName())
                 .build();
         new EHttp().newCall(build).async(new RequestCallback() {
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(final Response response) throws IOException {
                 System.out.println(response.body().string());
+
             }
 
             @Override

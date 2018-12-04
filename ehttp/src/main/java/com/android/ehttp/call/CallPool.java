@@ -1,4 +1,6 @@
-package com.android.ehttp;
+package com.android.ehttp.call;
+
+import com.android.ehttp.EHttpAsync;
 
 import java.util.ArrayList;
 import java.util.List;

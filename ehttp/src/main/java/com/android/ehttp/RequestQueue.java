@@ -1,5 +1,7 @@
 package com.android.ehttp;
 
+import com.android.ehttp.call.CallRequest;
+
 import java.io.IOException;
 
 /**
