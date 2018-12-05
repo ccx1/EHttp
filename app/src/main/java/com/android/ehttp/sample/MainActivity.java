@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         PostFormBody.Builder builder = new PostFormBody.Builder();
         ArrayList<Part>      parts   = new ArrayList<>();
         parts.add(new Part("userfile", file));
+        parts.add(new Part("userfile", file));
+        parts.add(new Part("userfile", file));
         builder.addParams("username", "asda")
                 .addFileParts(parts);
         ERequest build = new ERequest.Builder()
@@ -89,10 +91,10 @@ public class MainActivity extends AppCompatActivity {
         Map<String, String> map = new HashMap<>(16);
         map.put("aaa", "bbb");
         JSONObject jsonObject = new JSONObject(map);
-        PostBody   body       = PostBody.create(MediaType.parse("application/json;charset=utf-u"), jsonObject.toString());
+        PostBody   body       = PostBody.create(MediaType.parse("application/json;charset=utf-8"), jsonObject.toString());
         ERequest build = new ERequest.Builder()
                 .post(body)
-                .url("http://192.168.2.154:8080/Test02/upload")
+                .url("http://192.168.2.154:3001/api/get")
                 .build();
         mEHttp.newCall(build).async(new RequestCallback() {
             @Override
@@ -119,9 +121,6 @@ public class MainActivity extends AppCompatActivity {
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .setReadTimeOut(10)
-                .setWriteTimeOut(10)
-                .setConnectTimeOut(10)
                 .build();
         mEHttp.newCall(build).async(new RequestCallback() {
             @Override
@@ -143,9 +142,6 @@ public class MainActivity extends AppCompatActivity {
                 .addHeader("aa", "123")
                 .addHeader("a1a", "123")
                 .addHeader("a13a", "123")
-                .setReadTimeOut(10)
-                .setWriteTimeOut(10)
-                .setConnectTimeOut(10)
                 .build();
         mEHttp.newCall(build).async(new RequestCallback() {
             @Override
