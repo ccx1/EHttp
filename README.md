@@ -97,9 +97,12 @@ callpool优化
 
 #### 上传文件，并且有请求参数
 
+1. 上传单个文件
+
         PostFormBody.Builder builder = new PostFormBody.Builder();
         builder.addParams("123", "34526")
-                .addParams("adsfg", "Adfsg").addKeyAndFile("file",new File(path));
+                .addParams("adsfg", "Adfsg")
+                .addKeyAndFile("file",new File(path));
         ERequest build = new ERequest.Builder()
                 .post(builder.build())
                 .url("http://192.168.2.154:3001/api/get")
@@ -114,6 +117,31 @@ callpool优化
             @Override
             public void onResponse(Response response) throws IOException {
                 System.out.println(response.body().string());
+            }
+
+            @Override
+            public void onFailure(IOException e) {
+                System.out.println(e);
+            }
+        });
+
+
+2. 上传多个文件addFileParts上传多个文件。通过一个集合方式
+
+        PostFormBody.Builder builder = new PostFormBody.Builder();
+        ArrayList<Part>      parts   = new ArrayList<>();
+        parts.add(new Part("userfile", file));
+        builder.addParams("username", "asda")
+                .addFileParts(parts);
+        ERequest build = new ERequest.Builder()
+                .post(builder.build())
+                .url("http://192.168.2.154:8080/Test02/upload")
+                .build();
+        new EHttp().newCall(build).async(new RequestCallback() {
+            @Override
+            public void onResponse(final Response response) throws IOException {
+                System.out.println(response.body().string());
+
             }
 
             @Override

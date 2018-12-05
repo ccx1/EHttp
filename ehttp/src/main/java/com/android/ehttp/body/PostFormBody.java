@@ -3,7 +3,9 @@ package com.android.ehttp.body;
 import android.support.annotation.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.android.ehttp.Queue.TYPE_FORM_DATA;
@@ -20,14 +22,12 @@ import static com.android.ehttp.Queue.TYPE_FORM_DATA;
  */
 public class PostFormBody extends PostBody {
 
+    public List<Part>          parts;
     public Map<String, String> params;
-    public String              keyFile;
-    public File                mFile;
 
     private PostFormBody(Builder builder) {
         params = builder.params;
-        keyFile = builder.keyFile;
-        mFile = builder.mFile;
+        parts = builder.parts;
     }
 
     @Nullable
@@ -38,11 +38,13 @@ public class PostFormBody extends PostBody {
 
     public static final class Builder {
         private Map<String, String> params;
-        private String              keyFile;
-        private File                mFile;
+
+
+        private List<Part> parts;
 
         public Builder() {
             params = new HashMap<>();
+            parts = new ArrayList<>();
         }
 
         public Builder addParams(String key, String value) {
@@ -50,9 +52,18 @@ public class PostFormBody extends PostBody {
             return this;
         }
 
+        public Builder addKeyAndFile(String key, String name, File file) {
+            parts.clear();
+            parts.add(new Part(key, name, file));
+            return this;
+        }
+
         public Builder addKeyAndFile(String key, File file) {
-            keyFile = key;
-            mFile = file;
+            return addKeyAndFile(key, file.getName(), file);
+        }
+
+        public Builder addFileParts(List<Part> parts) {
+            this.parts = parts;
             return this;
         }
 
