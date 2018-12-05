@@ -40,19 +40,19 @@ import static com.android.ehttp.Queue.POST;
  * ================================================
  */
 public class CallRequest {
-    private        Map<String, String> queryMap;
-    private        PostModel           mP;
-    private        ERequest            eRequest;
-    private        String              method;
-    private        Map<String, String> header;
-    private        RequestCallback     requestCallback;
-    private        String              url;
-    private static SSLContext          ctx           = null;
-    private static HostnameVerifier    verifier      = null;
-    private static SSLSocketFactory    socketFactory = null;
-    private        HttpURLConnection   connection;
-    private        InputStream         resultStream;
-    private        byte[]              resultByte;
+    private        Map<String, String>   queryMap;
+    private        PostModel             mP;
+    private        ERequest              eRequest;
+    private        String                method;
+    private        Map<String, String>   header;
+    private        RequestCallback       requestCallback;
+    private        String                url;
+    private static SSLContext            ctx           = null;
+    private static HostnameVerifier      verifier      = null;
+    private static SSLSocketFactory      socketFactory = null;
+    private        HttpURLConnection     connection;
+    private        InputStream           resultStream;
+    private        ByteArrayOutputStream resultByte;
 
     public CallRequest(ERequest eRequest, RequestCallback requestCallback) {
         this.eRequest = eRequest;
@@ -133,8 +133,7 @@ public class CallRequest {
         if (inputStream == null) {
             throw new UnknownServiceException("service connect fail");
         }
-        ByteArrayOutputStream bos = getResult(resultStream);
-        this.resultByte = bos.toByteArray();
+        this.resultByte = getResult(resultStream);
     }
 
     @NonNull
@@ -155,7 +154,7 @@ public class CallRequest {
         return resultStream;
     }
 
-    public byte[] getResultByte() {
+    public ByteArrayOutputStream getResultByte() {
         return resultByte;
     }
 

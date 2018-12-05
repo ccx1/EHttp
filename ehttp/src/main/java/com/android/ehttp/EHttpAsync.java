@@ -23,12 +23,14 @@ import static com.android.ehttp.Queue.POST;
 public class EHttpAsync extends AsyncTask<CallRequest, Void, Response> {
 
 
-    private CallRequest currentCallRequest;
+    private CallRequest     currentCallRequest;
+    private OnStatusChanged mOnStatusChanged;
 
     @Override
     protected void onPreExecute() {
         // 异步前的操作
         // 主要是做一些状态记录
+        mOnStatusChanged.onCreate(this);
     }
 
 
@@ -72,7 +74,19 @@ public class EHttpAsync extends AsyncTask<CallRequest, Void, Response> {
         }
         if (this.isCancelled()) {
             this.onCancelled();
+            mOnStatusChanged.onCancelled(this);
         }
+    }
+
+
+    public void setOnCancelled(OnStatusChanged onStatusChanged) {
+        mOnStatusChanged = onStatusChanged;
+    }
+
+    public interface OnStatusChanged {
+        void onCreate(EHttpAsync eHttpAsync);
+
+        void onCancelled(EHttpAsync eHttpAsync);
     }
 
 }

@@ -2,6 +2,7 @@ package com.android.ehttp;
 
 import com.android.ehttp.call.CallRequest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -45,8 +46,8 @@ public class Response {
     }
 
     public IOException getException() {
-        if (mCurrentRequest.getResultByte() != null && mCurrentRequest.getResultByte().length != 0) {
-            return new IOException(new String(mCurrentRequest.getResultByte()));
+        if (mCurrentRequest.getResultByte() != null) {
+            return new IOException(new String(mCurrentRequest.getResultByte().toByteArray()));
         }
         return e;
     }
@@ -71,6 +72,10 @@ public class Response {
 
     public InputStream getInputStream() throws IOException {
         return mCurrentRequest.getConnection().getInputStream();
+    }
+
+    public ByteArrayOutputStream getByteStream() throws IOException {
+        return mCurrentRequest.getResultByte();
     }
 
 }

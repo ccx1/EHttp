@@ -25,7 +25,7 @@ public class ResponseBody {
     }
 
     public String string() throws IOException {
-        return new String(request.getResultByte());
+        return new String(request.getResultByte().toByteArray());
     }
 
 

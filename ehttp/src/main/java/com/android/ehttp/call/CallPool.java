@@ -18,7 +18,7 @@ import java.util.List;
 public class CallPool {
 
     private static CallPool         sCallPool;
-    private        List<EHttpAsync> task = new ArrayList<>();
+    private        List<EHttpAsync> mTask = new ArrayList<>();
 
     public static CallPool getInstance() {
         if (sCallPool == null) {
@@ -32,7 +32,23 @@ public class CallPool {
     }
 
     public EHttpAsync getOneAsync() {
-        return new EHttpAsync();
+        EHttpAsync eHttpAsync = new EHttpAsync();
+        eHttpAsync.setOnCancelled(new EHttpAsync.OnStatusChanged() {
+            @Override
+            public void onCreate(EHttpAsync eHttpAsync) {
+                mTask.remove(eHttpAsync);
+                if (eHttpAsync.isCancelled()) {
+                    eHttpAsync.cancel(true);
+                }
+                eHttpAsync = null;
+            }
+
+            @Override
+            public void onCancelled(EHttpAsync eHttpAsync) {
+                mTask.add(eHttpAsync);
+            }
+        });
+        return eHttpAsync;
     }
 
 
